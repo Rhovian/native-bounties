@@ -1,0 +1,16 @@
+[package]
+name = "native-mutual-assurance"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+no-entrypoint = []
+
+[dependencies]
+borsh = "1.5.0"
+solana-program = "1.18.13"
+
+
+[dev-dependencies]
+solana-program-test = "1.18.13"
+solana-sdk = "1.18.13"
