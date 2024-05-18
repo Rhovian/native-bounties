@@ -7,13 +7,13 @@ use {
     solana_program::{
         account_info::next_account_info, account_info::AccountInfo, clock::Clock,
         entrypoint::ProgramResult, msg, program_error::ProgramError, pubkey::Pubkey,
-        sysvar::Sysvar,
+        sysvar::Sysvar, program_pack::Pack,
     },
 };
 
-pub fn process_instruction<'a>(
-    program_id: &'a Pubkey,
-    accounts: &'a [AccountInfo<'a>],
+pub fn process_instruction(
+    program_id: &Pubkey,
+    accounts: &[AccountInfo],
     instruction_data: &[u8],
 ) -> ProgramResult {
     let instruction = PoidhInstruction::try_from_slice(instruction_data)?;
@@ -25,9 +25,9 @@ pub fn process_instruction<'a>(
     }
 }
 
-pub fn process_create_bounty<'a>(
-    program_id: &'a Pubkey,
-    accounts: &'a [AccountInfo<'a>],
+pub fn process_create_bounty(
+    program_id: &Pubkey,
+    accounts: & [AccountInfo],
     args: CreateBountyArgs,
 ) -> ProgramResult {
     let account_info_iter = &mut accounts.iter();
@@ -58,7 +58,10 @@ pub fn process_create_bounty<'a>(
         is_initialized: true,
     };
 
-    bounty_data.save(&mut bounty_account.data.borrow_mut())?;
+    let mut bounty_account_data = bounty_account.data.borrow_mut();
+    bounty_data.pack_into_slice(&mut bounty_account_data);
+
+    msg!("Packed bounty data: {:?}", bounty_account_data);
 
     Ok(())
 }

@@ -34,6 +34,17 @@ impl Bounty {
     pub const MAX_NAME_LENGTH: usize = 32;
     pub const MAX_DESCRIPTION_LENGTH: usize = 256;
 
+    pub const LEN: usize = 32
+    + 32
+    + 32
+    + (4 + Self::MAX_NAME_LENGTH)
+    + (4 + Self::MAX_DESCRIPTION_LENGTH)
+    + 8
+    + 32
+    + 8
+    + 8
+    + 1;
+
     pub fn save(&self, data: &mut [u8]) -> Result<(), ProgramError> {
         let mut bytes = Vec::with_capacity(Self::LEN);
         borsh::to_writer(&mut bytes, self)?;
@@ -43,16 +54,7 @@ impl Bounty {
 }
 
 impl Pack for Bounty {
-    const LEN: usize = 32
-        + 32
-        + 32
-        + (4 + Self::MAX_NAME_LENGTH)
-        + (4 + Self::MAX_DESCRIPTION_LENGTH)
-        + 8
-        + 32
-        + 8
-        + 8
-        + 1;
+    const LEN: usize = Bounty::LEN;
 
     fn pack_into_slice(&self, dst: &mut [u8]) {
         let mut slice = dst;

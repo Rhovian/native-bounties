@@ -6,9 +6,16 @@ mod tests {
         pubkey::Pubkey,
         rent::Rent,
         sysvar,
+        system_instruction,
+        program_pack::Pack,
     };
     use solana_program_test::*;
-    use solana_sdk::{signature::Keypair, transaction::Transaction};
+    use solana_sdk::{signature::{Signer, Keypair}, transaction::Transaction, account::Account};
+    use native_mutual_assurance::{
+        processor::process_instruction,
+        instruction::{PoidhInstruction, CreateBountyArgs},
+        state::Bounty,
+    };
 
     #[tokio::test]
     async fn test_create_bounty() {
@@ -97,5 +104,34 @@ mod tests {
         assert_eq!(bounty.amount, 100);
         assert_eq!(bounty.claimer, Pubkey::default());
         assert_eq!(bounty.claim_id, 0);
+    }
+    #[test]
+    fn test_bounty_serialization() {
+        let bounty = Bounty {
+            owner: Pubkey::new_from_array([
+                59, 193, 22, 87, 26, 195, 36, 74, 90, 45, 232, 45, 158, 14, 81, 199, 125, 64, 141, 15, 178, 109, 217, 67, 95, 152, 213, 18, 4, 156, 96, 2,
+            ]),
+            mint: Pubkey::new_from_array([
+                188, 75, 231, 124, 44, 68, 218, 101, 42, 237, 231, 88, 227, 244, 75, 174, 238, 11, 227, 114, 116, 22, 116, 193, 107, 123, 33, 51, 255, 27, 99, 127,
+            ]),
+            payment_mint: Pubkey::new_from_array([
+                60, 244, 118, 58, 72, 86, 81, 20, 36, 152, 243, 25, 7, 243, 1, 20, 133, 248, 253, 138, 77, 217, 168, 85, 153, 139, 217, 3, 173, 38, 92, 178,
+            ]),
+            name: "Test Bounty".to_string(),
+            description: "A test bounty".to_string(),
+            amount: 100,
+            claimer: Pubkey::default(),
+            created_at: 1716001125,
+            claim_id: 0,
+            is_initialized: true,
+        };
+    
+        println!("Bounty: {:?}", bounty);
+    
+        let mut expected_data = vec![0u8; Bounty::LEN];
+        bounty.pack_into_slice(&mut expected_data);
+    
+        // Print the expected serialized data
+        println!("Expected serialized data: {:?}", expected_data);
     }
 }
