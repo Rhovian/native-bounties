@@ -1,7 +1,6 @@
 use {
     borsh::{BorshDeserialize, BorshSerialize},
     solana_program::{
-        account_info::AccountInfo,
         program_error::ProgramError,
         program_pack::{IsInitialized, Pack, Sealed},
         pubkey::Pubkey,
@@ -31,8 +30,29 @@ impl IsInitialized for Bounty {
 
 impl Sealed for Bounty {} // what does this do?
 
+impl Bounty {
+    pub const MAX_NAME_LENGTH: usize = 32;
+    pub const MAX_DESCRIPTION_LENGTH: usize = 256;
+
+    pub fn save(&self, data: &mut [u8]) -> Result<(), ProgramError> {
+        let mut bytes = Vec::with_capacity(Self::LEN);
+        borsh::to_writer(&mut bytes, self)?;
+        data[..bytes.len()].copy_from_slice(&bytes);
+        Ok(())
+    }
+}
+
 impl Pack for Bounty {
-    const LEN: usize = 8 + 32 + 32 + 32 + 32 + 8 + 1 + 8 + 8 + 1;
+    const LEN: usize = 32
+        + 32
+        + 32
+        + (4 + Self::MAX_NAME_LENGTH)
+        + (4 + Self::MAX_DESCRIPTION_LENGTH)
+        + 8
+        + 32
+        + 8
+        + 8
+        + 1;
 
     fn pack_into_slice(&self, dst: &mut [u8]) {
         let mut slice = dst;
@@ -42,9 +62,4 @@ impl Pack for Bounty {
     fn unpack_from_slice(src: &[u8]) -> Result<Self, ProgramError> {
         Bounty::try_from_slice(src).map_err(|_| ProgramError::InvalidAccountData)
     }
-}
-
-pub fn write_data(account: &AccountInfo, input: &[u8], offset: usize) {
-    let mut account_data = account.data.borrow_mut();
-    account_data[offset..offset.saturating_add(input.len())].copy_from_slice(input);
 }
