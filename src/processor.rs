@@ -6,8 +6,8 @@ use {
     borsh::BorshDeserialize,
     solana_program::{
         account_info::next_account_info, account_info::AccountInfo, clock::Clock,
-        entrypoint::ProgramResult, msg, program_error::ProgramError, pubkey::Pubkey,
-        sysvar::Sysvar, program_pack::Pack,
+        entrypoint::ProgramResult, msg, program_error::ProgramError, program_pack::Pack,
+        pubkey::Pubkey, sysvar::Sysvar,
     },
 };
 
@@ -27,7 +27,7 @@ pub fn process_instruction(
 
 pub fn process_create_bounty(
     program_id: &Pubkey,
-    accounts: & [AccountInfo],
+    accounts: &[AccountInfo],
     args: CreateBountyArgs,
 ) -> ProgramResult {
     let account_info_iter = &mut accounts.iter();
@@ -58,10 +58,7 @@ pub fn process_create_bounty(
         is_initialized: true,
     };
 
-    let mut bounty_account_data = bounty_account.data.borrow_mut();
-    bounty_data.pack_into_slice(&mut bounty_account_data);
-
-    msg!("Packed bounty data: {:?}", bounty_account_data);
+    bounty_data.pack_into_slice(&mut bounty_account.data.borrow_mut());
 
     Ok(())
 }

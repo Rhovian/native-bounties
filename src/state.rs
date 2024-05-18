@@ -1,6 +1,7 @@
 use {
     borsh::{BorshDeserialize, BorshSerialize},
     solana_program::{
+        msg,
         program_error::ProgramError,
         program_pack::{IsInitialized, Pack, Sealed},
         pubkey::Pubkey,
@@ -35,15 +36,15 @@ impl Bounty {
     pub const MAX_DESCRIPTION_LENGTH: usize = 256;
 
     pub const LEN: usize = 32
-    + 32
-    + 32
-    + (4 + Self::MAX_NAME_LENGTH)
-    + (4 + Self::MAX_DESCRIPTION_LENGTH)
-    + 8
-    + 32
-    + 8
-    + 8
-    + 1;
+        + 32
+        + 32
+        + (4 + Self::MAX_NAME_LENGTH)
+        + (4 + Self::MAX_DESCRIPTION_LENGTH)
+        + 8
+        + 32
+        + 8
+        + 8
+        + 1;
 
     pub fn save(&self, data: &mut [u8]) -> Result<(), ProgramError> {
         let mut bytes = Vec::with_capacity(Self::LEN);
@@ -62,6 +63,10 @@ impl Pack for Bounty {
     }
 
     fn unpack_from_slice(src: &[u8]) -> Result<Self, ProgramError> {
-        Bounty::try_from_slice(src).map_err(|_| ProgramError::InvalidAccountData)
+        let mut p = src;
+        Bounty::deserialize(&mut p).map_err(|_| {
+            msg!("Failed to deserialize name record");
+            ProgramError::InvalidAccountData
+        })
     }
 }
