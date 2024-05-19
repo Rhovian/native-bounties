@@ -21,7 +21,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_create_bounty() {
-        let program_test = ProgramTest::new("poidh", ID, processor!(process_instruction));
+        let program_test = ProgramTest::new("Poidh", ID, processor!(process_instruction));
 
         let mint = Keypair::new();
 
@@ -41,8 +41,6 @@ mod tests {
                     AccountMeta::new(payer.pubkey(), true),
                     AccountMeta::new(bounty_account, false),
                     AccountMeta::new_readonly(mint.pubkey(), false),
-                    AccountMeta::new_readonly(spl_token::id(), false),
-                    AccountMeta::new_readonly(spl_associated_token_account::id(), false),
                     AccountMeta::new_readonly(solana_program::system_program::id(), false),
                 ],
             )],

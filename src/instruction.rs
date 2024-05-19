@@ -15,8 +15,6 @@ pub enum PoidhInstruction {
     /// 1. `[writeable, signer]` Funding account (must be a system account)
     /// 2. `[writeable]` Bounty to be created (program-derived address)
     /// 3. `[signer]` mint (Unique identifier for the bounty)
-    /// 7. `[]` Token program
-    /// 8. `[]` Associated token program
-    /// 9. `[]` System program
+    /// 4. `[]` System program
     CreateBounty(CreateBountyArgs),
 }

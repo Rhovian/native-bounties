@@ -4,14 +4,15 @@ use {
         state::Bounty,
         utils::{
             create_account,
-            pda::{find_bounty_account, BOUNTY},
             transfer,
+            pda::BOUNTY,
         },
+        validation::create_bounty_checks,
     },
     borsh::BorshDeserialize,
     solana_program::{
         account_info::next_account_info, account_info::AccountInfo, clock::Clock,
-        entrypoint::ProgramResult, msg, program_error::ProgramError, program_pack::Pack,
+        entrypoint::ProgramResult, msg, program_pack::Pack,
         pubkey::Pubkey, sysvar::Sysvar,
     },
 };
@@ -39,22 +40,15 @@ pub fn process_create_bounty(
     let funding_account = next_account_info(account_info_iter)?;
     let bounty_account = next_account_info(account_info_iter)?;
     let mint = next_account_info(account_info_iter)?;
-    let token_program = next_account_info(account_info_iter)?;
     let system_program = next_account_info(account_info_iter)?;
 
-    if !funding_account.is_signer {
-        return Err(ProgramError::MissingRequiredSignature);
-    }
-
-    let (bounty_pda, bump) = find_bounty_account(funding_account.key, mint.key);
-
-    if bounty_pda != *bounty_account.key {
-        return Err(ProgramError::InvalidAccountData);
-    }
-
-    if bounty_account.lamports() > 0 || !bounty_account.data_is_empty() {
-        return Err(ProgramError::AccountAlreadyInitialized);
-    }
+    let bump = create_bounty_checks(
+        program_id,
+        funding_account,
+        bounty_account,
+        mint,
+        system_program,
+    )?;
 
     // construct seeds with bump
     let seeds = &[
@@ -73,9 +67,7 @@ pub fn process_create_bounty(
         seeds,
     )?;
 
-    // transfer funds to bounty account
-    msg!("Transfer funds to bounty account");
-    transfer(funding_account, bounty_account, token_program, args.amount)?;
+    transfer(funding_account, bounty_account, system_program, args.amount)?;
 
     let bounty_data = Bounty {
         owner: *funding_account.key,

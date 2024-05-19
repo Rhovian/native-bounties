@@ -5,5 +5,6 @@ pub mod instruction;
 pub mod processor;
 pub mod state;
 pub mod utils;
+pub mod validation;
 
 solana_program::declare_id!("mataqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s");
