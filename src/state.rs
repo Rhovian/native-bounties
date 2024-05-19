@@ -13,7 +13,6 @@ use {
 pub struct Bounty {
     pub owner: Pubkey,
     pub mint: Pubkey, // is this needed?
-    pub payment_mint: Pubkey,
     pub name: String,
     pub description: String,
     pub amount: u64,
@@ -36,7 +35,6 @@ impl Bounty {
     pub const MAX_DESCRIPTION_LENGTH: usize = 256;
 
     pub const LEN: usize = 32
-        + 32
         + 32
         + (4 + Self::MAX_NAME_LENGTH)
         + (4 + Self::MAX_DESCRIPTION_LENGTH)

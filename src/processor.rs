@@ -2,6 +2,11 @@ use {
     crate::{
         instruction::{CreateBountyArgs, PoidhInstruction},
         state::Bounty,
+        utils::{
+            create_account,
+            pda::{find_bounty_account, BOUNTY},
+            transfer,
+        },
     },
     borsh::BorshDeserialize,
     solana_program::{
@@ -34,21 +39,47 @@ pub fn process_create_bounty(
     let funding_account = next_account_info(account_info_iter)?;
     let bounty_account = next_account_info(account_info_iter)?;
     let mint = next_account_info(account_info_iter)?;
-    let payment_mint = next_account_info(account_info_iter)?;
-    let funding_account_token = next_account_info(account_info_iter)?;
-    let bounty_account_token = next_account_info(account_info_iter)?;
     let token_program = next_account_info(account_info_iter)?;
-    let associated_token_program = next_account_info(account_info_iter)?;
     let system_program = next_account_info(account_info_iter)?;
 
     if !funding_account.is_signer {
         return Err(ProgramError::MissingRequiredSignature);
     }
 
+    let (bounty_pda, bump) = find_bounty_account(funding_account.key, mint.key);
+
+    if bounty_pda != *bounty_account.key {
+        return Err(ProgramError::InvalidAccountData);
+    }
+
+    if bounty_account.lamports() > 0 || !bounty_account.data_is_empty() {
+        return Err(ProgramError::AccountAlreadyInitialized);
+    }
+
+    // construct seeds with bump
+    let seeds = &[
+        BOUNTY.as_bytes(),
+        &funding_account.key.as_ref(),
+        &mint.key.as_ref(),
+        &[bump],
+    ];
+
+    create_account(
+        program_id,
+        bounty_account,
+        system_program,
+        funding_account,
+        Bounty::LEN,
+        seeds,
+    )?;
+
+    // transfer funds to bounty account
+    msg!("Transfer funds to bounty account");
+    transfer(funding_account, bounty_account, token_program, args.amount)?;
+
     let bounty_data = Bounty {
         owner: *funding_account.key,
         mint: *mint.key,
-        payment_mint: *payment_mint.key,
         name: args.name,
         description: args.description,
         amount: args.amount,
