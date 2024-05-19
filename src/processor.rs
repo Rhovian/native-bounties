@@ -48,6 +48,7 @@ pub fn process_create_bounty(
         bounty_account,
         mint,
         system_program,
+        args.amount,
     )?;
 
     // construct seeds with bump

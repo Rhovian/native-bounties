@@ -13,6 +13,7 @@ pub fn create_bounty_checks(
     bounty_account: &AccountInfo,
     mint: &AccountInfo,
     system_program: &AccountInfo,
+    amount: u64,
 ) -> Result<u8, ProgramError> {
     if system_program.key != &system_program::id() {
         return Err(ProgramError::InvalidArgument);
@@ -20,6 +21,10 @@ pub fn create_bounty_checks(
 
     if program_id != &crate::id() {
         return Err(ProgramError::IncorrectProgramId);
+    }
+
+    if amount == 0 {
+        return Err(ProgramError::InvalidArgument);
     }
 
     if !funding_account.is_signer {
