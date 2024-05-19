@@ -17,4 +17,12 @@ pub enum PoidhInstruction {
     /// 3. `[signer]` mint (Unique identifier for the bounty)
     /// 4. `[]` System program
     CreateBounty(CreateBountyArgs),
+    /// Close a bounty
+    ///
+    /// Accounts expected by this instruction:
+    /// 1. `[writeable, signer]` Owner of the bounty
+    /// 2. `[writeable]` Bounty account
+    /// 3. `[writeable]` Mint account
+    /// 4. `[]` System program
+    CloseBounty,
 }

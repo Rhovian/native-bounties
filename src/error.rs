@@ -13,6 +13,15 @@ pub enum PoidhError {
     /// 0 Failed to unpack instruction data
     #[error("InstructionUnpackError")]
     InstructionUnpackError,
+    /// 1 BountyNotInitialized
+    #[error("BountyNotInitialized")]
+    BountyNotInitialized,
+    /// 2 InvalidOwner
+    #[error("InvalidOwner")]
+    InvalidOwner,
+    /// 3 BountyAlreadyClaimed
+    #[error("BountyAlreadyClaimed")]
+    BountyAlreadyClaimed,
 }
 
 impl PrintProgramError for PoidhError {

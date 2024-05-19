@@ -3,7 +3,7 @@ use {
         instruction::{CreateBountyArgs, PoidhInstruction},
         state::Bounty,
         utils::{create_account, pda::BOUNTY, transfer},
-        validation::create_bounty_checks,
+        validation::{close_bounty_checks, create_bounty_checks},
     },
     borsh::BorshDeserialize,
     solana_program::{
@@ -22,6 +22,10 @@ pub fn process_instruction(
         PoidhInstruction::CreateBounty(args) => {
             msg!("Instruction: CreateBounty");
             process_create_bounty(program_id, accounts, args)
+        }
+        PoidhInstruction::CloseBounty => {
+            msg!("Instruction: CloseBounty");
+            process_close_bounty(program_id, accounts)
         }
     }
 }
@@ -46,7 +50,6 @@ pub fn process_create_bounty(
         args.amount,
     )?;
 
-    // construct seeds with bump
     let seeds = &[
         BOUNTY.as_bytes(),
         &funding_account.key.as_ref(),
@@ -78,6 +81,22 @@ pub fn process_create_bounty(
     };
 
     bounty_data.pack_into_slice(&mut bounty_account.data.borrow_mut());
+
+    Ok(())
+}
+
+pub fn process_close_bounty(program_id: &Pubkey, accounts: &[AccountInfo]) -> ProgramResult {
+    let account_info_iter = &mut accounts.iter();
+    let owner = next_account_info(account_info_iter)?;
+    let bounty_account = next_account_info(account_info_iter)?;
+    let mint = next_account_info(account_info_iter)?;
+    let system_program = next_account_info(account_info_iter)?;
+
+    close_bounty_checks(program_id, owner, bounty_account, mint, system_program)?;
+
+    let amount = bounty_account.lamports();
+    **bounty_account.try_borrow_mut_lamports()? -= amount;
+    **owner.try_borrow_mut_lamports()? += amount;
 
     Ok(())
 }
