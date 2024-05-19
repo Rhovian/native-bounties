@@ -1,7 +1,5 @@
 use {
-    crate::{
-        utils::pda::find_bounty_account,
-    },
+    crate::utils::pda::find_bounty_account,
     solana_program::{
         account_info::AccountInfo, program_error::ProgramError, pubkey::Pubkey, system_program,
     },

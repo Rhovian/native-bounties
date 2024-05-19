@@ -2,18 +2,13 @@ use {
     crate::{
         instruction::{CreateBountyArgs, PoidhInstruction},
         state::Bounty,
-        utils::{
-            create_account,
-            transfer,
-            pda::BOUNTY,
-        },
+        utils::{create_account, pda::BOUNTY, transfer},
         validation::create_bounty_checks,
     },
     borsh::BorshDeserialize,
     solana_program::{
         account_info::next_account_info, account_info::AccountInfo, clock::Clock,
-        entrypoint::ProgramResult, msg, program_pack::Pack,
-        pubkey::Pubkey, sysvar::Sysvar,
+        entrypoint::ProgramResult, msg, program_pack::Pack, pubkey::Pubkey, sysvar::Sysvar,
     },
 };
 
