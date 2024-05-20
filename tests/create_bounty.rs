@@ -3,11 +3,9 @@ pub mod utils;
 
 use native_mutual_assurance::ID;
 use native_mutual_assurance::{
-    instruction::{CreateBountyArgs, PoidhInstruction},
     state::Bounty,
 };
 use solana_program::{
-    instruction::{AccountMeta, Instruction},
     program_pack::Pack,
     pubkey::Pubkey,
     rent::Rent,
@@ -20,25 +18,18 @@ async fn test_create_bounty() {
     let (mut banks_client, payer, mint, bounty_account, recent_blockhash) = utils::setup().await;
 
     let mut transaction = Transaction::new_with_payer(
-        &[Instruction::new_with_borsh(
-            ID,
-            &PoidhInstruction::CreateBounty(CreateBountyArgs {
-                name: "Test Bounty".to_string(),
-                description: "A test bounty".to_string(),
-                amount: 100_000_000,
-            }),
-            vec![
-                AccountMeta::new(payer.pubkey(), true),
-                AccountMeta::new(bounty_account, false),
-                AccountMeta::new_readonly(mint.pubkey(), false),
-                AccountMeta::new_readonly(solana_program::system_program::id(), false),
-            ],
-        )],
+        &utils::create_bounty_instruction(
+            &payer,
+            bounty_account,
+            mint.pubkey(),
+            "Test Bounty".to_string(),
+            "A test bounty".to_string(),
+            100_000_000,
+        ),
         Some(&payer.pubkey()),
     );
 
     transaction.sign(&[&payer], recent_blockhash);
-
     banks_client.process_transaction(transaction).await.unwrap();
 
     let bounty_account_info = banks_client
